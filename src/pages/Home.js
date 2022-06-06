@@ -2,7 +2,7 @@ import React,{useState,useEffect,useContext} from 'react'
 import AuthContext from '../context/AuthContext'
 
 const Home = () => {
-  let { authTokens } = useContext(AuthContext)
+  let { authTokens, logoutUser } = useContext(AuthContext)
   const [notes,setNotes] = useState([])
 
   console.log(authTokens.access)
@@ -19,8 +19,11 @@ const Home = () => {
       }
     })
     let data = await response.json();
-    console.log(data)
-    setNotes(data)
+    if(response.status === 200){
+      setNotes(data)
+    }else if(response.statusText === 'Unauthorized'){
+      logoutUser()
+    }
   }
   return (
     <div>
