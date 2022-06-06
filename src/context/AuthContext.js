@@ -11,15 +11,16 @@ export default AuthContext
 export const AuthProvider = ({ children }) =>{
     const history = useNavigate();
 
-    let [ authTokens, setAuthTokens] = useState(localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')):(null))
-    let [ user, setUser] = useState(localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')):(null))
+    // call back ensures the state is called once in the initial render.
+    let [ authTokens, setAuthTokens] = useState(()=> localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')):(null))
+    let [ user, setUser] = useState(()=> localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')):(null))
 
 
     let loginUser = async(e) =>{
         e.preventDefault();
          let response = await  fetch('http://127.0.0.1:8000/api/token/',{
             method: 'POST',
-            headers:{
+            headers:{ 
                 'Content-Type' : 'application/json'
             },
             body: JSON.stringify({ 'username':e.target.username.value, 'password': e.target.password.value})
@@ -31,13 +32,21 @@ export const AuthProvider = ({ children }) =>{
             localStorage.setItem('authTokens', JSON.stringify(data))
             history('/')
         }else{
-            alert('Something wen wrong!')
+            alert('Something went wrong!')
         }
 
     }
+
+    let logoutUser = ()=>{
+        setAuthTokens(null)
+        setUser(null)
+        localStorage.removeItem('authTokens')
+        history('/login')
+    }
     let contextData = {
         user: user,
-        loginUser: loginUser
+        loginUser: loginUser,
+        logoutUser: logoutUser
     }
 
     return(
